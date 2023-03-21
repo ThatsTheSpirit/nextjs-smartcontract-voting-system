@@ -105,11 +105,11 @@ export default function CreateForm() {
 
     return (
         <form>
-            <div class="flex flex-col content-center items-center">
+            <div className="flex flex-col content-center items-center">
                 <div className="w-3/4">
                     <label
-                        for="question"
-                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        htmlFor="question"
+                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >
                         Question
                     </label>
@@ -117,7 +117,7 @@ export default function CreateForm() {
                         onChange={handleQuestion}
                         type="text"
                         id="question"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="Are you the rabbit?"
                         required
                     />
@@ -128,8 +128,8 @@ export default function CreateForm() {
                     return (
                         <div key={index} className="w-3/4">
                             <label
-                                for={cand}
-                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                htmlFor={cand}
+                                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                             >
                                 Candidate {index + 1}
                             </label>
@@ -138,7 +138,7 @@ export default function CreateForm() {
                                 type="text"
                                 id={cand}
                                 name={cand}
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                 placeholder="Yes"
                                 value={input.cand}
                                 required
@@ -149,8 +149,8 @@ export default function CreateForm() {
 
                 <div className="w-3/4">
                     <label
-                        for="duration"
-                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        htmlFor="duration"
+                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >
                         Duration
                     </label>
@@ -158,15 +158,15 @@ export default function CreateForm() {
                         onChange={handleDuration}
                         type="number"
                         id="duration"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="15"
                         required
                     />
                 </div>
                 <div className="w-3/4">
                     <label
-                        for="quorum"
-                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        htmlFor="quorum"
+                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >
                         Quorum
                     </label>
@@ -174,7 +174,7 @@ export default function CreateForm() {
                         onChange={handleQuorum}
                         type="number"
                         id="quorum"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="60"
                         required
                     />
@@ -183,7 +183,7 @@ export default function CreateForm() {
                     <button
                         onClick={addCandidateInput}
                         type="button"
-                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                     >
                         Add candidate
                     </button>

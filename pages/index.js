@@ -3,14 +3,13 @@ import Image from "next/image"
 import { Inter } from "next/font/google"
 import styles from "@/styles/Home.module.css"
 import Header from "@/components/Header"
-import { useMoralis, useWeb3Contract } from "react-moralis"
+import { useMoralis, useWeb3Contract} from "react-moralis"
 import Card from "@/components/Card"
 import Footer from "@/components/Footer"
 import { contractAddresses, votingEngAbi, votingAbi } from "@/constants"
 import { useEffect, useState } from "react"
 import { useNotification } from "web3uikit"
 import { ethers } from "ethers"
-import Web3 from "web3"
 
 const inter = Inter({ subsets: ["latin"] })
 const supportedChains = ["31337", "5", "80001", "11155111"]
@@ -59,9 +58,35 @@ export default function Home() {
     })
 
     useEffect(() => {
+        async function test() {
+            console.log(votingsCount)
+            for (; id < votingsCount; ) {
+                console.log(id)
+                //const addressVotingFromCall = await getVoting()
+                //setvotingAddress(addressVotingFromCall)
+
+                const questionFromCall = await getVotingQuestion()
+                console.log("Question: " + questionFromCall)
+                setQuestions([...questions, questionFromCall])
+
+                console.log(questions)
+                console.log(isLoading)
+                console.log(isFetching)
+                //setId(id + 1)
+                id++
+            }
+        }
+        test()
+    }, [votingsCount])
+
+    useEffect(() => {
         async function updateUIValues() {
-            const votingsCountFromCall = (await getVotingsCount()).toNumber()
-            setVotingsCount(votingsCountFromCall)
+            const votingsCountFromCall = await getVotingsCount()
+            console.log(votingsCountFromCall)
+
+            console.log(votingEngAddress)
+
+            setVotingsCount(votingsCountFromCall.toNumber())
             console.log("Count: " + votingsCount)
 
             //if (votingsCount > 0) {
@@ -86,9 +111,9 @@ export default function Home() {
             updateUIValues()
         } else {
             //setVotingsCount(0)
-            setQuestions([])
+            //setQuestions([])
         }
-    }, [])
+    }, [isWeb3Enabled])
 
     return (
         <div className={styles.container}>

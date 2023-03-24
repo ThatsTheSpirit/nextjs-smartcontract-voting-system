@@ -3,7 +3,7 @@ import Image from "next/image"
 import { Inter } from "next/font/google"
 import styles from "@/styles/Home.module.css"
 import Header from "@/components/Header"
-import { useMoralis, useWeb3Contract} from "react-moralis"
+import { useMoralis, useWeb3Contract } from "react-moralis"
 import Card from "@/components/Card"
 import Footer from "@/components/Footer"
 import { contractAddresses, votingEngAbi, votingAbi } from "@/constants"
@@ -58,39 +58,15 @@ export default function Home() {
     })
 
     useEffect(() => {
-        async function test() {
-            console.log(votingsCount)
-            for (; id < votingsCount; ) {
-                console.log(id)
-                //const addressVotingFromCall = await getVoting()
-                //setvotingAddress(addressVotingFromCall)
-
-                const questionFromCall = await getVotingQuestion()
-                console.log("Question: " + questionFromCall)
-                setQuestions([...questions, questionFromCall])
-
-                console.log(questions)
-                console.log(isLoading)
-                console.log(isFetching)
-                //setId(id + 1)
-                id++
-            }
-        }
-        test()
-    }, [votingsCount])
-
-    useEffect(() => {
         async function updateUIValues() {
             const votingsCountFromCall = await getVotingsCount()
             console.log(votingsCountFromCall)
-
             console.log(votingEngAddress)
 
-            setVotingsCount(votingsCountFromCall.toNumber())
-            console.log("Count: " + votingsCount)
+            setVotingsCount(Number(votingsCountFromCall))
 
             //if (votingsCount > 0) {
-            for (; id < votingsCount; ) {
+            for (let counter = 0; counter < votingsCount; counter++) {
                 console.log(id)
                 //const addressVotingFromCall = await getVoting()
                 //setvotingAddress(addressVotingFromCall)
@@ -98,12 +74,6 @@ export default function Home() {
                 const questionFromCall = await getVotingQuestion()
                 console.log("Question: " + questionFromCall)
                 setQuestions([...questions, questionFromCall])
-
-                console.log(questions)
-                console.log(isLoading)
-                console.log(isFetching)
-                //setId(id + 1)
-                id++
             }
         }
 
@@ -124,13 +94,7 @@ export default function Home() {
             </Head>
             <Header />
 
-            <div
-                onClick={() => {
-                    console.log(votingsCount)
-                }}
-            >
-                Votings count: {votingsCount}
-            </div>
+            <div>Votings count: {votingsCount}</div>
             <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 justify-items-center">
                 {votingsCount > 0 ? (
                     questions.map((q, index) => <Card key={index} question={q} id={index} />)
@@ -146,3 +110,4 @@ export default function Home() {
         </div>
     )
 }
+

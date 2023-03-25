@@ -3,7 +3,7 @@ import Image from "next/image"
 import { Inter } from "next/font/google"
 import styles from "@/styles/Home.module.css"
 import Header from "@/components/Header"
-import { useMoralis, useWeb3Contract} from "react-moralis"
+import { useMoralis, useWeb3Contract } from "react-moralis"
 import Card from "@/components/Card"
 import Footer from "@/components/Footer"
 import { contractAddresses, votingEngAbi, votingAbi } from "@/constants"
@@ -11,10 +11,21 @@ import { useEffect, useState } from "react"
 import { useNotification } from "web3uikit"
 import { ethers } from "ethers"
 
+import { useContractEvent, createClient, configureChains, useContractRead } from "wagmi"
+import { hardhat } from "wagmi/chains"
+import { publicProvider } from "wagmi/providers/public"
+
 const inter = Inter({ subsets: ["latin"] })
 const supportedChains = ["31337", "5", "80001", "11155111"]
 
 export default function Home() {
+    const { provider, webSocketProvider } = configureChains([hardhat], [publicProvider()])
+
+    const client = createClient({
+        provider,
+        webSocketProvider,
+    })
+
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const chainId = parseInt(chainIdHex)
     const votingEngAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
@@ -23,6 +34,20 @@ export default function Home() {
     let [votingAddress, setvotingAddress] = useState("0x")
     let [questions, setQuestions] = useState([])
     let [id, setId] = useState(0)
+
+    useContractEvent({
+        address: votingEngAddress,
+        abi: votingEngAbi,
+        eventName: "VotingCreated",
+        listener(question) {
+            console.log(question)
+            async function renewCount() {
+                const votingsCountFromCall = await getVotingsCount()
+                setVotingsCount(Number(votingsCountFromCall))
+            }
+            renewCount()
+        },
+    })
 
     const { runContractFunction: getVotingsCount } = useWeb3Contract({
         abi: votingEngAbi,

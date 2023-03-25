@@ -1,10 +1,20 @@
 import { contractAddresses, votingEngAbi } from "@/constants"
 import { useEffect, useState } from "react"
-import { useWeb3Contract } from "react-moralis"
+import { useWeb3Contract, useMoralisSubscription, useMoralisQuery } from "react-moralis"
 import { useMoralis } from "react-moralis"
 import { useNotification } from "web3uikit"
+import { useContractEvent, createClient, configureChains, useContractRead } from "wagmi"
+import { hardhat } from "wagmi/chains"
+import { publicProvider } from "wagmi/providers/public"
 
 export default function CreateForm() {
+    const { provider, webSocketProvider } = configureChains([hardhat], [publicProvider()])
+
+    const client = createClient({
+        provider,
+        webSocketProvider,
+    })
+
     let [question, setQuestion] = useState("")
     let [duration, setDuration] = useState(0)
     let [quorum, setQuorum] = useState(0)
@@ -15,6 +25,29 @@ export default function CreateForm() {
     const votingEngAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
 
     const dispatch = useNotification()
+
+    // useMoralisSubscription("VotingCreated", (q) => q, [], {
+    //     onCreate: (data) => console.log(`${data} was just created`),
+    // })
+
+    // const { data: votingsCount, refetch } = useContractRead({
+    //     address: votingEngAddress,
+    //     abi: votingEngAbi,
+    //     functionName: "getVotingsCount",
+    //     onSuccess: () => {
+    //         refetch()
+    //         document.head.title.innerText = votingsCount.toString()
+    //     },
+    // })
+
+    useContractEvent({
+        address: votingEngAddress,
+        abi: votingEngAbi,
+        eventName: "VotingCreated",
+        listener(question) {
+            console.log(question)
+        },
+    })
 
     const {
         runContractFunction: createVoting,

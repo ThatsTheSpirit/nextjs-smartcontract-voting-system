@@ -1,4 +1,4 @@
-import { contractAddresses, votingEngAbi } from "@/constants"
+import { contractAddresses, votingEngAbi, votingAbi } from "@/constants"
 import { useEffect, useState } from "react"
 import { useWeb3Contract, useMoralisSubscription, useMoralisQuery } from "react-moralis"
 import { useMoralis } from "react-moralis"
@@ -6,6 +6,7 @@ import { useNotification } from "web3uikit"
 import { useContractEvent, createClient, configureChains, useContractRead } from "wagmi"
 import { hardhat } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
+import AddVoters from "./AddVoters"
 
 export default function CreateForm() {
     const { provider, webSocketProvider } = configureChains([hardhat], [publicProvider()])
@@ -19,8 +20,10 @@ export default function CreateForm() {
     let [duration, setDuration] = useState(0)
     let [quorum, setQuorum] = useState(0)
     let [inputFieldsCandidates, setinputFieldsCandidates] = useState(["", ""])
+    let [addresses, setAddresses] = useState([])
+    let [createdContract, setCreatedContract] = useState("")
 
-    const { chainId: chainIdHex, isWeb3Enabled, enableWeb3 } = useMoralis()
+    const { chainId: chainIdHex, isWeb3Enabled, enableWeb3, account } = useMoralis()
     const chainId = parseInt(chainIdHex)
     const votingEngAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
 
@@ -44,8 +47,9 @@ export default function CreateForm() {
         address: votingEngAddress,
         abi: votingEngAbi,
         eventName: "VotingCreated",
-        listener(question) {
-            console.log(question)
+        listener(votingAddress) {
+            console.log(votingAddress)
+            setCreatedContract(votingAddress)
         },
     })
 
@@ -64,10 +68,25 @@ export default function CreateForm() {
             _candidates: inputFieldsCandidates,
             _duration: duration,
             _quorum: quorum,
-        }, //add question, candidates, duration, quorum through props
-        //params: { _question: "Shit?", _candidates: ["yes", "no"], _duration: 600, _quorum: 50 }, //add question, candidates, duration, quorum through props
-        //msgValue: [],
+            _voters: addresses,
+            _owner: account,
+        },
     })
+
+    // const {
+    //     runContractFunction: registerVoters,
+    //     isFetching: isFetchingReg,
+    //     isLoading: isLoadingReg,
+    //     data: dataReg,
+    //     error: errorReg,
+    // } = useWeb3Contract({
+    //     abi: votingAbi,
+    //     contractAddress: createdContract,
+    //     functionName: "registerVoters",
+    //     params: {
+    //         _voters: addresses,
+    //     },
+    // })
 
     //state variables
 
@@ -79,7 +98,7 @@ export default function CreateForm() {
 
     const handleNewNotification = () => {
         dispatch({
-            type: "info",
+            type: "success",
             message: "Transaction Complete!",
             title: "Transaction Notification",
             position: "topR",
@@ -133,7 +152,15 @@ export default function CreateForm() {
                 onError: (error) => console.log(error),
             })
         }
+
+        const regVoters = async () => {
+            await registerVoters({
+                onSuccess: handleSuccess2,
+                onError: (error) => console.log(error),
+            })
+        }
         sendCreateVoting()
+        //regVoters()
     }
 
     return (
@@ -212,13 +239,17 @@ export default function CreateForm() {
                         required
                     />
                 </div>
+
+                <div className="w-3/4">
+                    <AddVoters addresses={addresses} setAddresses={setAddresses} />
+                </div>
                 <div className="mt-2 flex flex-col items-center">
                     <button
                         onClick={addCandidateInput}
                         type="button"
                         className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                     >
-                        Add candidate
+                        Add a candidate
                     </button>
                     <button
                         disabled={isLoading || isFetching}

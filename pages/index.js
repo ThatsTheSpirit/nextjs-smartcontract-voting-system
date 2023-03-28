@@ -44,6 +44,7 @@ export default function Home() {
             async function renewCount() {
                 const votingsCountFromCall = await getVotingsCount()
                 setVotingsCount(Number(votingsCountFromCall))
+                setId(Number(votingsCountFromCall) - 1)
             }
             renewCount()
         },
@@ -71,6 +72,13 @@ export default function Home() {
         params: {},
     })
 
+    const { runContractFunction: getVotings } = useWeb3Contract({
+        abi: votingEngAbi,
+        contractAddress: votingEngAddress,
+        functionName: "getVotings",
+        params: {},
+    })
+
     const {
         runContractFunction: getVotingQuestion,
         isFetching,
@@ -84,59 +92,76 @@ export default function Home() {
 
     useEffect(() => {
         async function test() {
+            console.log("useEffect test start")
             console.log(votingsCount)
-            for (; id < votingsCount; ) {
-                console.log(id)
-                //const addressVotingFromCall = await getVoting()
-                //setvotingAddress(addressVotingFromCall)
+            //for (let id = 0; id < votingsCount; id++) {
+            console.log(id)
+            //const addressVotingFromCall = await getVoting()
+            //setvotingAddress(addressVotingFromCall)
 
-                const questionFromCall = await getVotingQuestion()
-                console.log("Question: " + questionFromCall)
+            const questionFromCall = await getVotingQuestion()
+            console.log("Question: " + questionFromCall)
+            if (questionFromCall) {
                 setQuestions([...questions, questionFromCall])
-
-                console.log(questions)
-                console.log(isLoading)
-                console.log(isFetching)
-                //setId(id + 1)
-                id++
             }
+
+            console.log(questions)
+            console.log(isLoading)
+            console.log(isFetching)
+            //setId(id + 1)
+            //}
+            console.log("useEffect test start")
         }
         test()
     }, [votingsCount])
 
     useEffect(() => {
         async function updateUIValues() {
+            console.log("useEffect updateUIValues start")
             const votingsCountFromCall = await getVotingsCount()
-            console.log(votingsCountFromCall)
+            console.log(`votingsCountFromCall: ${votingsCountFromCall}`)
 
-            console.log(votingEngAddress)
+            console.log(`votingEngAddress: ${votingEngAddress}`)
 
-            setVotingsCount(votingsCountFromCall.toNumber())
+            setVotingsCount(Number(votingsCountFromCall))
             console.log("Count: " + votingsCount)
 
             //if (votingsCount > 0) {
-            for (; id < votingsCount; ) {
+            let _questions = [...questions]
+
+            const votingsFromCall = await getVotings()
+
+            console.log(`votingsFromCall: ${votingsFromCall}`)
+
+            for (id = 0; id < votingsCount; id++) {
+                //setId(id)
                 console.log(id)
                 //const addressVotingFromCall = await getVoting()
                 //setvotingAddress(addressVotingFromCall)
 
-                const questionFromCall = await getVotingQuestion()
-                console.log("Question: " + questionFromCall)
-                setQuestions([...questions, questionFromCall])
+                const questionFromCall = await getVotingQuestion({ params: { index: id } })
 
-                console.log(questions)
+                console.log("Question: " + questionFromCall)
+
+                _questions.push(questionFromCall)
+                console.log("Questions: ", _questions)
+
                 console.log(isLoading)
                 console.log(isFetching)
                 //setId(id + 1)
-                id++
+                //id++
             }
+            setQuestions(_questions)
+            console.log("State questions: ", questions)
+            console.log("useEffect updateUIValues end")
         }
 
         if (isWeb3Enabled) {
             updateUIValues()
         } else {
-            //setVotingsCount(0)
-            //setQuestions([])
+            setVotingsCount(0)
+            setId(0)
+            setQuestions([])
         }
     }, [isWeb3Enabled])
 
@@ -162,10 +187,6 @@ export default function Home() {
                 ) : (
                     <Card question={"Nothing there"} />
                 )}
-                {/* <Card />
-                <Card />
-                <Card />
-                <Card /> */}
             </div>
             <Footer />
         </div>

@@ -27,7 +27,7 @@ export default function AddVoters({ addresses, setAddresses }) {
     return (
         <>
             <label
-                for="message"
+                htmlFor="message"
                 className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >
                 Add voters

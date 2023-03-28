@@ -4,6 +4,7 @@ import { useWeb3Contract } from "react-moralis"
 import { useMoralis } from "react-moralis"
 import { useNotification } from "web3uikit"
 import { ethers } from "ethers"
+import { useContractEvent } from "wagmi"
 
 export default function CreateVoting() {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
@@ -22,8 +23,7 @@ export default function CreateVoting() {
         abi: votingEngAbi,
         contractAddress: votingEngAddress,
         functionName: "getVotingsCount",
-        params: {}, //add question, candidates, duration, quorum through props
-        //msgValue: [],
+        params: {},
     })
 
     async function updateUIValues() {
@@ -37,21 +37,26 @@ export default function CreateVoting() {
         }
     }, [isWeb3Enabled])
 
-    const handleNewNotification = () => {
+    const handleNewNotification = (tx, type, message, position) => {
         dispatch({
-            type: "info",
-            message: "Transaction Complete!",
+            type: type,
+            message: message,
             title: "Transaction Notification",
-            position: "topR",
+            position: position,
             icon: "bell",
         })
     }
 
-    const handleSuccess = async (tx) => {
+    const handleSuccess = async (
+        tx,
+        type = "info",
+        message = "Transaction Complete!",
+        position = "topR"
+    ) => {
         try {
             await tx.wait(1)
             updateUIValues()
-            handleNewNotification(tx)
+            handleNewNotification(tx, type, message, position)
         } catch (error) {
             console.log(error)
         }
@@ -89,9 +94,7 @@ export default function CreateVoting() {
             _candidates: [candidate1, candidate2],
             _duration: duration,
             _quorum: quorum,
-        }, //add question, candidates, duration, quorum through props
-        //params: { _question: "Shit?", _candidates: ["yes", "no"], _duration: 600, _quorum: 50 }, //add question, candidates, duration, quorum through props
-        //msgValue: [],
+        },
     })
 
     return (

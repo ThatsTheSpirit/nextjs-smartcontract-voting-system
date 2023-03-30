@@ -7,6 +7,7 @@ import { useContractEvent, createClient, configureChains, useContractRead } from
 import { hardhat } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
 import AddVoters from "./AddVoters"
+import { DatePicker } from "web3uikit"
 
 export default function CreateForm() {
     const { provider, webSocketProvider } = configureChains([hardhat], [publicProvider()])
@@ -17,7 +18,7 @@ export default function CreateForm() {
     })
 
     let [question, setQuestion] = useState("")
-    let [duration, setDuration] = useState(0)
+    let [timeEnd, setTimeEnd] = useState(0)
     let [quorum, setQuorum] = useState(0)
     let [inputFieldsCandidates, setinputFieldsCandidates] = useState(["", ""])
     let [addresses, setAddresses] = useState([])
@@ -66,7 +67,7 @@ export default function CreateForm() {
         params: {
             _question: question,
             _candidates: inputFieldsCandidates,
-            _duration: duration,
+            _timeEnd: timeEnd,
             _quorum: quorum,
             _voters: addresses,
             _owner: account,
@@ -120,8 +121,8 @@ export default function CreateForm() {
         setQuestion(event.target.value)
     }
 
-    function handleDuration(event) {
-        setDuration(parseInt(event.target.value))
+    function handleTimeEnd(event) {
+        setTimeEnd(parseInt(event.target.value))
     }
     function handleQuorum(event) {
         setQuorum(parseInt(event.target.value))
@@ -138,11 +139,17 @@ export default function CreateForm() {
         setinputFieldsCandidates(data)
     }
 
+    function handleDatePicker(date) {
+        const dateFromUser = date.getTime()
+        console.log(dateFromUser)
+        setTimeEnd(dateFromUser)
+    }
+
     const submit = (e) => {
         e.preventDefault()
         console.log(`Candidates: ${inputFieldsCandidates}`)
         console.log(`Question: ${question}`)
-        console.log(`Duration: ${duration}`)
+        console.log(`Time end: ${new Date(timeEnd).toLocaleString()}`)
         console.log(`Quorum: ${quorum}`)
         const sendCreateVoting = async () => {
             await createVoting({
@@ -209,18 +216,30 @@ export default function CreateForm() {
 
                 <div className="w-3/4">
                     <label
-                        htmlFor="duration"
+                        htmlFor="date-picker"
                         className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >
-                        Duration
+                        Time end
                     </label>
-                    <input
-                        onChange={handleDuration}
+                    {/* <input
+                        onChange={handleTimeEnd}
                         type="number"
-                        id="duration"
+                        id="timeEnd"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="15"
                         required
+                    /> */}
+                    <DatePicker
+                        id="date-picker"
+                        onChange={({ event: e, date }) => {
+                            handleDatePicker(date)
+                        }}
+                        validation={{
+                            min: new Date().toISOString().substring(0, 10),
+                            required: true,
+                        }}
+                        type="date"
+                        value=""
                     />
                 </div>
                 <div className="w-3/4">

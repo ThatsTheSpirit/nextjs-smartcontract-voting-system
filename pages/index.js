@@ -183,9 +183,11 @@ export default function Home() {
             </div>
             <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 justify-items-center">
                 {votingsCount > 0 ? (
-                    questions.map((q, index) => <Card key={index} question={q} id={index} />)
+                    questions.map((q, index) => (
+                        <Card key={index} question={q} id={index} link={true} />
+                    ))
                 ) : (
-                    <Card question={"Nothing there"} />
+                    <Card question={"Nothing there"} link={false} />
                 )}
             </div>
             <Footer />

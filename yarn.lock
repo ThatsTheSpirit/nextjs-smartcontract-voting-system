@@ -5413,6 +5413,13 @@ flatted@^3.1.0:
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.2.7.tgz#609f39207cb614b89d0765b477cb2d437fbf9787"
   integrity sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==
 
+flowbite-datepicker@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/flowbite-datepicker/-/flowbite-datepicker-1.2.2.tgz#b3430ef6077d17c9bc4792c592587365eb4e289e"
+  integrity sha512-qOKDVtwkiOa0RrhD3sRtT45H8efAtyLiswuFIAV0UBhWSRYonzL0g1gAZwHiRRKtSmbET/8RQpQXlSEmAgadkg==
+  dependencies:
+    flowbite "^1.4.5"
+
 flowbite-react@^0.4.2:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/flowbite-react/-/flowbite-react-0.4.2.tgz#660f0fdc9630d82cd1e2ae11a4d2080225410f1d"
@@ -5423,7 +5430,7 @@ flowbite-react@^0.4.2:
     react-icons "^4.7.1"
     react-indiana-drag-scroll "^2.2.0"
 
-flowbite@^1.6.4:
+flowbite@^1.4.5, flowbite@^1.6.4:
   version "1.6.4"
   resolved "https://registry.yarnpkg.com/flowbite/-/flowbite-1.6.4.tgz#ea86f8f90e8d1279e2611c25838f6d112777e7d3"
   integrity sha512-//kSaigwERCcE3udumadB3+xfOXeN/ZQzcub2qVCHuB7uscB4XIm3yP9R8zL0XsEOnYG2lnroq/dydQZbzvESw==

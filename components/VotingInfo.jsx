@@ -3,6 +3,7 @@ import { useWeb3Contract } from "react-moralis"
 import { useMoralis } from "react-moralis"
 import { contractAddresses, votingEngAbi, votingAbi } from "@/constants"
 import Header from "./Header"
+import Radio from "./Radio"
 
 export default function VotingInfo({ id }) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
@@ -12,7 +13,7 @@ export default function VotingInfo({ id }) {
     let [votingAddress, setvotingAddress] = useState("0x")
     let [question, setQuestion] = useState("")
     let [candidates, setCandidates] = useState([])
-    let [duration, setDuration] = useState(0)
+    let [timeEnd, setTimeEnd] = useState("")
     let [quorum, setQuorum] = useState(0)
 
     useEffect(() => {
@@ -31,10 +32,14 @@ export default function VotingInfo({ id }) {
         const candidatesFromCall = await getCandidates()
         setCandidates(candidatesFromCall)
 
-        const timeStartFromCall = parseInt(await getTimeStart())
-        const timeEndFromCall = parseInt(await getTimeEnd())
-        const durationFromCall = timeEndFromCall - timeStartFromCall
-        setDuration(durationFromCall)
+        //const timeStartFromCall = parseInt(await getTimeStart())
+        const timeEndFromCall = Number(await getTimeEnd())
+
+        const dateEnd = new Date(timeEndFromCall).toLocaleDateString()
+
+        //const durationFromCall = timeEndFromCall - timeStartFromCall
+        //setDuration(durationFromCall)
+        setTimeEnd(dateEnd)
 
         const quorumFromCall = parseInt(await getQuorum())
         setQuorum(quorumFromCall)
@@ -85,22 +90,19 @@ export default function VotingInfo({ id }) {
     return (
         <>
             <Header />
-            <div className="py-4 px-4 font-bold text-3xl">
-                <div>Address: {votingAddress}</div>
-                <div>Question: {question}</div>
-                {candidates && candidates.map((el) => <div key={el}>Candidate: {el}</div>)}
-                {/* <div>Candidate 1: {candidates && candidates[0]}</div>
-                <div>Candidate 2: {candidates && candidates[1]}</div> */}
-                <div>Duration: {duration}</div>
-                <div>Quorum: {quorum}</div>
-                <div>ID: {id}</div>
-                {/* <button
-                    onClick={async () => {
-                        setvotingAddress(
-                            await getVoting({ onError: (error) => console.log(error) })
-                        )
-                    }}
-                ></button> */}
+            <div className="mt-2 my-0 mx-auto flex flex-col content-center items-center rounded-lg divide-y w-2/3 divide-gray-100 border-green-200 bg-zinc-100">
+                <div className="w-3/4">Address: {votingAddress}</div>
+                <div className="w-3/4">Question: {question}</div>
+                <div className="w-3/4">
+                    {candidates &&
+                        candidates.map((el, index) => (
+                            <Radio key={index} text={el} index={index} />
+                        ))}
+                </div>
+                {/* {candidates && candidates.map((el) => <div key={el}>Candidate: {el}</div>)} */}
+                <div className="w-3/4">Time end: {timeEnd}</div>
+                <div className="w-3/4">Quorum: {quorum}</div>
+                <div className="w-3/4">ID: {id}</div>
             </div>
         </>
     )

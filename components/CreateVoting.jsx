@@ -16,7 +16,7 @@ export default function CreateVoting() {
     let [question, setQuestion] = useState("")
     let [candidate1, setCandidate1] = useState("")
     let [candidate2, setCandidate2] = useState("")
-    let [duration, setDuration] = useState(0)
+    let [timeEnd, setTimeEnd] = useState(0)
     let [quorum, setQuorum] = useState(0)
 
     const { runContractFunction: getVotingsCount } = useWeb3Contract({
@@ -72,8 +72,8 @@ export default function CreateVoting() {
     function handleCandidate2(event) {
         setCandidate2(event.target.value)
     }
-    function handleDuration(event) {
-        setDuration(parseInt(event.target.value))
+    function handleTimeEnd(event) {
+        setTimeEnd(parseInt(event.target.value))
     }
     function handleQuorum(event) {
         setQuorum(parseInt(event.target.value))
@@ -92,7 +92,7 @@ export default function CreateVoting() {
         params: {
             _question: question,
             _candidates: [candidate1, candidate2],
-            _duration: duration,
+            _timeEnd: timeEnd,
             _quorum: quorum,
         },
     })
@@ -117,8 +117,8 @@ export default function CreateVoting() {
                         <input type="text" name="cand2" id="cand2" onChange={handleCandidate2} />
                     </div>
                     <div>
-                        <label htmlFor="dur">Duration</label>
-                        <input type="text" name="dur" id="dur" onChange={handleDuration} />
+                        <label htmlFor="timeEnd">Time end</label>
+                        <input type="text" name="timeEnd" id="timeEnd" onChange={handleTimeEnd} />
                     </div>
                     <div>
                         <label htmlFor="quorum">Quorum</label>

@@ -1,5 +1,6 @@
 export default function Card(props) {
-    const { question, id } = props
+    const { question, id, link } = props
+
     //console.log(props)
     return (
         <div className="mb-2 max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
@@ -13,7 +14,7 @@ export default function Card(props) {
                 chronological order.
             </p>
             <a
-                href={`votings/${id}`}
+                href={link ? `votings/${id}` : ""}
                 className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
                 Open voting

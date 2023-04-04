@@ -11,7 +11,7 @@ import { useEffect, useState } from "react"
 import { useNotification } from "web3uikit"
 import { ethers } from "ethers"
 
-import { useContractEvent, createClient, configureChains, useContractRead } from "wagmi"
+import { useContractEvent, createClient, configureChains, useContractWrite } from "wagmi"
 import { hardhat } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
 
@@ -34,6 +34,7 @@ export default function Home() {
     let [votingAddress, setvotingAddress] = useState("0x")
     let [questions, setQuestions] = useState([])
     let [id, setId] = useState(0)
+    let [votingAddresses, setVotingAddresses] = useState([])
 
     useContractEvent({
         address: votingEngAddress,
@@ -48,6 +49,13 @@ export default function Home() {
             }
             renewCount()
         },
+    })
+
+    const { write } = useContractWrite({
+        mode: "recklesslyUnprepared",
+        address: votingAddress,
+        abi: votingAbi,
+        functionName: "getQuestion",
     })
 
     const { runContractFunction: getVotingsCount } = useWeb3Contract({
@@ -130,16 +138,24 @@ export default function Home() {
             let _questions = [...questions]
 
             const votingsFromCall = await getVotings()
-
+            setVotingAddresses(votingsFromCall)
             console.log(`votingsFromCall: ${votingsFromCall}`)
 
-            for (id = 0; id < votingsCount; id++) {
-                //setId(id)
-                console.log(id)
+            votingsFromCall.forEach(async (addr, id) => {
+                setvotingAddress(addr)
+                const q = await getQuestion({ params: { index: id } })
+                console.log(q)
+            })
+
+            for (let id = 0; id < votingsCount; id++) {
+                console.log(`id = ${id}`)
+
+                //console.log(`questionData is ${questionData}`)
                 //const addressVotingFromCall = await getVoting()
                 //setvotingAddress(addressVotingFromCall)
 
-                const questionFromCall = await getVotingQuestion({ params: { index: id } })
+                const questionFromCall = await getVotingQuestion({ onSuccess: setId(id + 1) })
+                //const q = write()
 
                 console.log("Question: " + questionFromCall)
 
@@ -164,6 +180,16 @@ export default function Home() {
             setQuestions([])
         }
     }, [isWeb3Enabled])
+
+    useEffect(() => {
+        async function updateCards() {
+            const votingAddressesFromCall = await getVotings()
+            setVotingAddresses(votingAddressesFromCall)
+        }
+        updateCards()
+    })
+
+    //useEffect(() => {}, [votingAddresses])
 
     return (
         <div className={styles.container}>

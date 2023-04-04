@@ -74,21 +74,6 @@ export default function CreateForm() {
         },
     })
 
-    // const {
-    //     runContractFunction: registerVoters,
-    //     isFetching: isFetchingReg,
-    //     isLoading: isLoadingReg,
-    //     data: dataReg,
-    //     error: errorReg,
-    // } = useWeb3Contract({
-    //     abi: votingAbi,
-    //     contractAddress: createdContract,
-    //     functionName: "registerVoters",
-    //     params: {
-    //         _voters: addresses,
-    //     },
-    // })
-
     //state variables
 
     useEffect(() => {

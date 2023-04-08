@@ -86,6 +86,12 @@ export default function Home() {
         functionName: "getVotings",
         params: {},
     })
+    const { runContractFunction: getVotingsQuestions } = useWeb3Contract({
+        abi: votingEngAbi,
+        contractAddress: votingEngAddress,
+        functionName: "getVotingsQuestions",
+        params: {},
+    })
 
     const {
         runContractFunction: getVotingQuestion,
@@ -99,28 +105,7 @@ export default function Home() {
     })
 
     useEffect(() => {
-        async function test() {
-            console.log("useEffect test start")
-            console.log(votingsCount)
-            //for (let id = 0; id < votingsCount; id++) {
-            console.log(id)
-            //const addressVotingFromCall = await getVoting()
-            //setvotingAddress(addressVotingFromCall)
-
-            const questionFromCall = await getVotingQuestion()
-            console.log("Question: " + questionFromCall)
-            if (questionFromCall) {
-                setQuestions([...questions, questionFromCall])
-            }
-
-            console.log(questions)
-            console.log(isLoading)
-            console.log(isFetching)
-            //setId(id + 1)
-            //}
-            console.log("useEffect test start")
-        }
-        test()
+        updateQuestions()
     }, [votingsCount])
 
     useEffect(() => {
@@ -134,40 +119,10 @@ export default function Home() {
             setVotingsCount(Number(votingsCountFromCall))
             console.log("Count: " + votingsCount)
 
-            //if (votingsCount > 0) {
-            let _questions = [...questions]
-
             const votingsFromCall = await getVotings()
             setVotingAddresses(votingsFromCall)
             console.log(`votingsFromCall: ${votingsFromCall}`)
 
-            votingsFromCall.forEach(async (addr, id) => {
-                setvotingAddress(addr)
-                const q = await getQuestion({ params: { index: id } })
-                console.log(q)
-            })
-
-            for (let id = 0; id < votingsCount; id++) {
-                console.log(`id = ${id}`)
-
-                //console.log(`questionData is ${questionData}`)
-                //const addressVotingFromCall = await getVoting()
-                //setvotingAddress(addressVotingFromCall)
-
-                const questionFromCall = await getVotingQuestion({ onSuccess: setId(id + 1) })
-                //const q = write()
-
-                console.log("Question: " + questionFromCall)
-
-                _questions.push(questionFromCall)
-                console.log("Questions: ", _questions)
-
-                console.log(isLoading)
-                console.log(isFetching)
-                //setId(id + 1)
-                //id++
-            }
-            setQuestions(_questions)
             console.log("State questions: ", questions)
             console.log("useEffect updateUIValues end")
         }
@@ -181,15 +136,24 @@ export default function Home() {
         }
     }, [isWeb3Enabled])
 
-    useEffect(() => {
-        async function updateCards() {
-            const votingAddressesFromCall = await getVotings()
-            setVotingAddresses(votingAddressesFromCall)
-        }
-        updateCards()
-    })
+    async function updateVotings() {
+        const votingAddressesFromCall = await getVotings()
+        setVotingAddresses(votingAddressesFromCall)
+    }
 
-    //useEffect(() => {}, [votingAddresses])
+    async function updateQuestions() {
+        const questionsFromCall = await getVotingsQuestions()
+        console.log("Qs from call: ", questionsFromCall)
+        setQuestions(questionsFromCall)
+    }
+
+    useEffect(() => {
+        updateQuestions()
+    }, [votingAddresses])
+
+    useEffect(() => {
+        updateVotings()
+    }, [votingEngAddress])
 
     return (
         <div className={styles.container}>
@@ -208,7 +172,7 @@ export default function Home() {
                 Votings count: {votingsCount}
             </div>
             <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 justify-items-center">
-                {votingsCount > 0 ? (
+                {votingsCount > 0 && questions ? (
                     questions.map((q, index) => (
                         <Card key={index} question={q} id={index} link={true} />
                     ))

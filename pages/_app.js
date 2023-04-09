@@ -1,7 +1,6 @@
 import "@/styles/globals.css"
 import { MoralisProvider } from "react-moralis"
 import { NotificationProvider } from "web3uikit"
-
 import { WagmiConfig, createClient, configureChains, mainnet } from "wagmi"
 import { hardhat, polygonMumbai } from "@wagmi/chains"
 import { alchemyProvider } from "wagmi/providers/alchemy"

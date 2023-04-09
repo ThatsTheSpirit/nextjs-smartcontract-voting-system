@@ -69,7 +69,7 @@ export default function VotingInfo({ id }) {
         //const timeStartFromCall = parseInt(await getTimeStart())
         const timeEndFromCall = Number(await getTimeEnd())
 
-        const dateEnd = new Date(timeEndFromCall).toLocaleDateString()
+        const dateEnd = new Date(timeEndFromCall).toLocaleString()
 
         //const durationFromCall = timeEndFromCall - timeStartFromCall
         //setDuration(durationFromCall)

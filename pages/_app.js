@@ -20,7 +20,10 @@ import { WalletConnectConnector } from "wagmi/connectors/walletConnect"
 // )
 
 // Set up client
-const { provider, webSocketProvider } = configureChains([hardhat], [publicProvider()])
+const { provider, webSocketProvider } = configureChains(
+    [hardhat, polygonMumbai],
+    [publicProvider()]
+)
 
 const client = createClient({
     provider,

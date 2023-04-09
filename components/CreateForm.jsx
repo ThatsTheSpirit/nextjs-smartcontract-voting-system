@@ -4,10 +4,11 @@ import { useWeb3Contract, useMoralisSubscription, useMoralisQuery } from "react-
 import { useMoralis } from "react-moralis"
 import { useNotification } from "web3uikit"
 import { useContractEvent, createClient, configureChains, useContractRead } from "wagmi"
-import { hardhat } from "wagmi/chains"
+import { hardhat, polygonMumbai, goerli, sepolia } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
 import AddVoters from "./AddVoters"
 import { DatePicker } from "web3uikit"
+import TimePicker from "./TimePicker"
 
 export default function CreateForm() {
     const { provider, webSocketProvider } = configureChains([hardhat], [publicProvider()])
@@ -23,26 +24,13 @@ export default function CreateForm() {
     let [inputFieldsCandidates, setinputFieldsCandidates] = useState(["", ""])
     let [addresses, setAddresses] = useState([])
     let [createdContract, setCreatedContract] = useState("")
+    let [formatEndDate, setformatEndDate] = useState(false)
 
     const { chainId: chainIdHex, isWeb3Enabled, enableWeb3, account } = useMoralis()
     const chainId = parseInt(chainIdHex)
     const votingEngAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
 
     const dispatch = useNotification()
-
-    // useMoralisSubscription("VotingCreated", (q) => q, [], {
-    //     onCreate: (data) => console.log(`${data} was just created`),
-    // })
-
-    // const { data: votingsCount, refetch } = useContractRead({
-    //     address: votingEngAddress,
-    //     abi: votingEngAbi,
-    //     functionName: "getVotingsCount",
-    //     onSuccess: () => {
-    //         refetch()
-    //         document.head.title.innerText = votingsCount.toString()
-    //     },
-    // })
 
     useContractEvent({
         address: votingEngAddress,
@@ -124,7 +112,12 @@ export default function CreateForm() {
         setinputFieldsCandidates(data)
     }
 
-    function handleDatePicker(date) {
+    function handleformatEndDate(event) {
+        setformatEndDate(event.target.checked)
+        console.log(event.target.checked)
+    }
+
+    function handleDateTimePicker(date) {
         const dateFromUser = date.getTime()
         console.log(dateFromUser)
         setTimeEnd(dateFromUser)
@@ -199,34 +192,75 @@ export default function CreateForm() {
                     )
                 })}
 
-                <div className="w-3/4">
-                    <label
-                        htmlFor="date-picker"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                        Time end
+                <div className="w-3/4 items-center">
+                    <label className="relative inline-flex items-center mt-2 cursor-pointer justify-center">
+                        <input
+                            type="checkbox"
+                            value=""
+                            className="sr-only peer"
+                            onChange={handleformatEndDate}
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                        <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+                            Date/Time
+                        </span>
                     </label>
-                    {/* <input
-                        onChange={handleTimeEnd}
-                        type="number"
-                        id="timeEnd"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        placeholder="15"
-                        required
-                    /> */}
-                    <DatePicker
-                        id="date-picker"
-                        onChange={({ event: e, date }) => {
-                            handleDatePicker(date)
-                        }}
-                        validation={{
-                            min: new Date().toISOString().substring(0, 10),
-                            required: true,
-                        }}
-                        type="date"
-                        value=""
-                    />
                 </div>
+
+                {!formatEndDate ? (
+                    <div className="w-3/4">
+                        <label
+                            htmlFor="date-picker"
+                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                            Date end
+                        </label>
+                        <DatePicker
+                            id="date-picker"
+                            onChange={({ event: e, date }) => {
+                                handleDateTimePicker(date)
+                            }}
+                            validation={{
+                                min: new Date().toISOString().substring(0, 10),
+                                required: true,
+                            }}
+                            type="date"
+                            value=""
+                        />
+                    </div>
+                ) : (
+                    <div
+                        className=" w-3/4"
+                        id="timepicker-disable-past"
+                        data-te-input-wrapper-init
+                    >
+                        <label
+                            htmlFor="time-picker"
+                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                            Time end
+                        </label>
+                        <TimePicker setTime={setTimeEnd} />
+                        {/* <input
+                            min={new Date().toLocaleTimeString()}
+                            value={new Date(timeEnd).toLocaleTimeString()}
+                            placeholder="12:00"
+                            type="time"
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            id="time-picker"
+                            required
+                            step="60"
+                            onChange={(event) => {
+                                const time = event.target.value
+                                console.log("Time is", time)
+                                const [hours, minutes, _] = time.split(":")
+                                let date = new Date()
+                                date.setHours(hours, minutes)
+                                handleDateTimePicker(date)
+                            }}
+                        /> */}
+                    </div>
+                )}
                 <div className="w-3/4">
                     <label
                         htmlFor="quorum"

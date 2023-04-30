@@ -6,12 +6,17 @@ import { useNotification } from "web3uikit"
 import { useContractEvent, createClient, configureChains, useContractRead } from "wagmi"
 import { hardhat, polygonMumbai, goerli, sepolia } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
+const { GelatoOpsSDK, isGelatoOpsSupported } = require("@gelatonetwork/ops-sdk")
 import AddVoters from "./AddVoters"
 import { DatePicker } from "web3uikit"
 import TimePicker from "./TimePicker"
+import { ethers } from "ethers"
 
 export default function CreateForm() {
-    const { provider, webSocketProvider } = configureChains([hardhat], [publicProvider()])
+    const { provider, webSocketProvider } = configureChains(
+        [hardhat, polygonMumbai, goerli, sepolia],
+        [publicProvider()]
+    )
 
     const client = createClient({
         provider,
@@ -26,9 +31,14 @@ export default function CreateForm() {
     let [createdContract, setCreatedContract] = useState("")
     let [formatEndDate, setformatEndDate] = useState(false)
 
+    let [contract, setContract] = useState()
+    let [dedicated, setDedicated] = useState("")
+
     const { chainId: chainIdHex, isWeb3Enabled, enableWeb3, account } = useMoralis()
     const chainId = parseInt(chainIdHex)
     const votingEngAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
+
+    let [isSupportedChain, setIsSupportedChain] = useState(isGelatoOpsSupported(chainId))
 
     const dispatch = useNotification()
 
@@ -39,6 +49,8 @@ export default function CreateForm() {
         listener(votingAddress) {
             console.log(votingAddress)
             setCreatedContract(votingAddress)
+
+            useGelatoOracle() //set timeEnd for Oracle
         },
     })
 
@@ -61,6 +73,44 @@ export default function CreateForm() {
             _owner: account,
         },
     })
+
+    const { runContractFunction: addToWhitelist } = useWeb3Contract({
+        abi: votingAbi,
+        contractAddress: createdContract,
+        functionName: "addToWhitelist",
+        params: {
+            _addr: dedicated,
+        },
+    })
+
+    async function createVotingEthersjs() {
+        const provider = new ethers.providers.Web3Provider(window.ethereum)
+        const signer = provider.getSigner()
+        const contractEng = new ethers.Contract(votingEngAddress, votingEngAbi, signer)
+
+        setContract(contractEng)
+
+        // contract.on("VotingCreated", (addr) => {
+        //     setCreatedContract(addr)
+        //     console.log(addr)
+        // })
+
+        const tx = await contractEng.createVoting(
+            question,
+            inputFieldsCandidates,
+            timeEnd,
+            quorum,
+            addresses,
+            account,
+            {
+                gasLimit: 2025446,
+            }
+        )
+        const txReceipt = await tx.wait(1)
+        console.log(txReceipt.logs)
+
+        setCreatedContract(txReceipt.logs[0].address)
+    }
 
     //state variables
 
@@ -123,29 +173,64 @@ export default function CreateForm() {
         setTimeEnd(dateFromUser)
     }
 
+    const useGelatoOracle = async () => {
+        if (isGelatoOpsSupported(chainId)) {
+            const provider = new ethers.providers.Web3Provider(window.ethereum)
+            const signer = provider.getSigner()
+
+            const ethersContract = new ethers.Contract(createdContract, votingAbi, signer)
+            const gelatoOps = new GelatoOpsSDK(chainId, signer)
+
+            // Prepare Task data to automate
+            const selector = ethersContract.interface.getSighash("defWinner()")
+            //const resolverData = ethersContract.interface.getSighash("getState()")
+
+            const { taskId, tx } = await gelatoOps.createTask({
+                execAddress: createdContract,
+                execSelector: selector,
+                //resolverAddress: createdContract,
+                //resolverData: resolverData,
+                dedicatedMsgSender: true,
+                name: "Automated Voting using resolver",
+                startTime: Math.floor(timeEnd / 1000),
+                singleExec: true,
+            })
+
+            const { address, isDeployed } = await gelatoOps.getDedicatedMsgSender()
+
+            setDedicated(address)
+
+            await addToWhitelist()
+
+            const activeTasks = await gelatoOps.getActiveTasks()
+            activeTasks.forEach((task) => {
+                console.log(`- ${task.name} (${task.taskId})`)
+            })
+        }
+    }
+
     const submit = (e) => {
         e.preventDefault()
         console.log(`Candidates: ${inputFieldsCandidates}`)
         console.log(`Question: ${question}`)
         console.log(`Time end: ${new Date(timeEnd).toLocaleString()}`)
         console.log(`Quorum: ${quorum}`)
+
+        console.log(`chainId: ${chainId}`)
+
         const sendCreateVoting = async () => {
-            await createVoting({
-                // onComplete:
-                // onError:
-                onSuccess: handleSuccess,
-                onError: (error) => console.log(error),
-            })
+            if (chainId == 31337 || !isSupportedChain()) {
+                await createVoting({
+                    onSuccess: handleSuccess,
+                    onError: (error) => console.log(error),
+                })
+            } else {
+                await createVotingEthersjs()
+                await useGelatoOracle()
+            }
         }
 
-        const regVoters = async () => {
-            await registerVoters({
-                onSuccess: handleSuccess2,
-                onError: (error) => console.log(error),
-            })
-        }
         sendCreateVoting()
-        //regVoters()
     }
 
     return (
@@ -242,24 +327,6 @@ export default function CreateForm() {
                         </label>
 
                         <TimePicker setTime={setTimeEnd} />
-                        {/* <input
-                            min={new Date().toLocaleTimeString()}
-                            value={new Date(timeEnd).toLocaleTimeString()}
-                            placeholder="12:00"
-                            type="time"
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            id="time-picker"
-                            required
-                            step="60"
-                            onChange={(event) => {
-                                const time = event.target.value
-                                console.log("Time is", time)
-                                const [hours, minutes, _] = time.split(":")
-                                let date = new Date()
-                                date.setHours(hours, minutes)
-                                handleDateTimePicker(date)
-                            }}
-                        /> */}
                     </div>
                 )}
                 <div className="w-3/4">

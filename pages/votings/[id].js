@@ -7,7 +7,6 @@ export default function DynamicVotingInfo() {
 
     return (
         <>
-            {/* <div>Id: {id}</div> */}
             <VotingInfo id={id} />
         </>
     )

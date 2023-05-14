@@ -1,6 +1,94 @@
 import { ResponsivePie } from "@nivo/pie"
+import { useEffect, useState } from "react"
+import { useWeb3Contract } from "react-moralis"
+import { useMoralis } from "react-moralis"
+import { contractAddresses, votingEngAbi, votingAbi } from "@/constants"
+import { useRouter } from "next/router"
 
-export default function Results({ id }) {
+export default function Results() {
+    const router = useRouter()
+    const { id } = router.query
+
+    const { chainId: chainIdHex, isWeb3Enabled, account } = useMoralis()
+    const chainId = parseInt(chainIdHex)
+    const votingEngAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
+
+    const [votingAddress, setVotingAddress] = useState("")
+    const [stopEffect, setStopEffect] = useState(false)
+    const [candidates, setCandidates] = useState([])
+    const [winner, setWinner] = useState("")
+    const [candVotes, setCandVotes] = useState([])
+
+    function getRandomInt(min, max) {
+        min = Math.ceil(min)
+        max = Math.floor(max)
+        return Math.floor(Math.random() * (max - min + 1)) + min
+    }
+
+    const { runContractFunction: getVoting } = useWeb3Contract({
+        abi: votingEngAbi,
+        contractAddress: votingEngAddress,
+        functionName: "getVoting",
+        params: { index: id },
+    })
+
+    const { runContractFunction: getCandidates } = useWeb3Contract({
+        abi: votingAbi,
+        contractAddress: votingAddress,
+        functionName: "getCandidates",
+        params: {},
+    })
+
+    const { runContractFunction: getWinner } = useWeb3Contract({
+        abi: votingAbi,
+        contractAddress: votingAddress,
+        functionName: "getWinner",
+        //params: { index: id },
+    })
+
+    async function updateVotingInfo() {
+        const address = await getVoting()
+        setVotingAddress(address)
+        console.log(address)
+    }
+
+    useEffect(() => {
+        updateVotingInfo()
+    }, [])
+
+    useEffect(() => {
+        updateVotingInfo()
+
+        if (votingAddress == "undefined") {
+            setStopEffect(!stopEffect)
+        }
+    }, [stopEffect])
+
+    useEffect(() => {
+        async function getInfo() {
+            const candidatesFromCall = await getCandidates()
+            setCandidates(candidatesFromCall)
+            console.log(candidatesFromCall)
+
+            let candInfo = candidatesFromCall.map((candidate) => {
+                return {
+                    id: candidate,
+                    label: candidate,
+                    value: 50, //get real data
+                    color: `hsl(${getRandomInt(0, 255)}, 70%, 50%)`,
+                }
+            })
+
+            console.log(candInfo)
+            setCandVotes(candInfo)
+
+            const winnerFromCall = await getWinner()
+            setWinner(winnerFromCall)
+            console.log(winnerFromCall)
+        }
+        getInfo()
+    }, [votingAddress])
+
     const data = [
         {
             id: "make",
@@ -38,7 +126,7 @@ export default function Results({ id }) {
             <ResponsivePie
                 //height={600}
                 //width={600}
-                data={data}
+                data={candVotes}
                 margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
                 innerRadius={0.5}
                 padAngle={0.7}

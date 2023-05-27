@@ -8,10 +8,11 @@ import { hardhat } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
 import Header from "./Header"
 import Radio from "./Radio"
+import { useRouter } from "next/router"
 
 export default function VotingInfo({ id }) {
     const { provider, webSocketProvider } = configureChains([hardhat], [publicProvider()])
-
+    const router = useRouter()
     const client = createClient({
         provider,
         webSocketProvider,
@@ -27,8 +28,18 @@ export default function VotingInfo({ id }) {
     let [timeEnd, setTimeEnd] = useState("")
     let [quorum, setQuorum] = useState(0)
     let [voted, setVoted] = useState(false)
+    let [opened, setOpened] = useState(true)
     let [candidate, setCandidate] = useState(0)
     const dispatch = useNotification()
+
+    useContractEvent({
+        address: votingAddress,
+        abi: votingAbi,
+        eventName: "VotingClosed",
+        listener() {
+            setOpened(false)
+        },
+    })
 
     useEffect(() => {
         if (isWeb3Enabled) {
@@ -81,6 +92,10 @@ export default function VotingInfo({ id }) {
         const voterVotedFromCall = await getVoterVoted()
         console.log(`Voted: ${voterVotedFromCall}`)
         setVoted(voterVotedFromCall)
+
+        const votingStateClosed = parseInt(await getState())
+        console.log(`State: ${votingStateClosed}`)
+        setOpened(votingStateClosed != 2)
     }
 
     function handleVote(e) {
@@ -113,6 +128,13 @@ export default function VotingInfo({ id }) {
         contractAddress: votingEngAddress,
         functionName: "getVoting",
         params: { index: id },
+    })
+
+    const { runContractFunction: getState } = useWeb3Contract({
+        abi: votingEngAbi,
+        contractAddress: votingEngAddress,
+        functionName: "getState",
+        //params: { index: id },
     })
 
     const { runContractFunction: getQuestion } = useWeb3Contract({
@@ -157,11 +179,26 @@ export default function VotingInfo({ id }) {
         params: { voter: account },
     })
 
-    const { runContractFunction: voteFor } = useWeb3Contract({
+    const {
+        runContractFunction: voteFor,
+        isFetching,
+        isLoading,
+    } = useWeb3Contract({
         abi: votingAbi,
         contractAddress: votingAddress,
         functionName: "voteFor",
         params: { _candidate: candidate },
+    })
+
+    const {
+        runContractFunction: defWinner,
+        isFetchingDef,
+        isLoadingDef,
+    } = useWeb3Contract({
+        abi: votingAbi,
+        contractAddress: votingAddress,
+        functionName: "defWinner",
+        //params: {},
     })
 
     const handleNewNotification = () => {
@@ -197,7 +234,7 @@ export default function VotingInfo({ id }) {
                                 key={index}
                                 text={el}
                                 index={index}
-                                disabled={voted}
+                                disabled={voted || !opened || isFetching || isLoading}
                                 setCandidate={setCandidate}
                             />
                         ))}
@@ -207,8 +244,8 @@ export default function VotingInfo({ id }) {
                 <div className="w-3/4">ID: {id}</div>
                 <div className="w-12">
                     <button
-                        disabled={voted}
-                        hidden={voted}
+                        disabled={voted || !opened || isFetching || isLoading}
+                        hidden={voted || !opened}
                         onClick={handleVote}
                         type="submit"
                         className="mt-2 text-white bg-green-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -216,11 +253,22 @@ export default function VotingInfo({ id }) {
                         Vote
                     </button>
                 </div>
+                <div className="w-12">
+                    <button
+                        disabled={!opened}
+                        hidden={!opened}
+                        className="mt-2 text-white bg-red-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        onClick={async () => await defWinner()}
+                    >
+                        Close
+                    </button>
+                </div>
                 <div className="w-14">
                     <button
                         //onClick={handleVote}
                         disabled={!voted}
                         hidden={!voted}
+                        onClick={() => router.push(`${id}/results`)}
                         type="button"
                         className="mt-2 text-white bg-green-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                     >

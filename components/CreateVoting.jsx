@@ -97,6 +97,12 @@ export default function CreateVoting() {
         },
     })
 
+    async function createVotingEthersjs() {
+        const signer = await ethers.getSigner()
+        const contractEng = new ethers.Contract(votingEngAddress, votingEngAbi, signer)
+        const tx = await contractEng.createVoting(question, )
+    }
+
     return (
         <div className="p-5">
             {/* <h1 className="py-4 px-4 font-bold text-3xl">Voting System</h1> */}
@@ -140,7 +146,6 @@ export default function CreateVoting() {
                     </button>
 
                     <div></div>
-                    {/* {data && <pre>{JSON.stringify(data)}</pre>} */}
                 </>
             ) : (
                 <div>Please connect to a supported chain</div>

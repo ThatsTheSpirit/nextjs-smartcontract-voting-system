@@ -14,6 +14,7 @@ import { ethers } from "ethers"
 import { useContractEvent, createClient, configureChains, useContractWrite } from "wagmi"
 import { hardhat } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
+import Navbar from "@/components/Navbar"
 
 const inter = Inter({ subsets: ["latin"] })
 const supportedChains = ["31337", "5", "80001", "11155111"]
@@ -162,6 +163,7 @@ export default function Home() {
                 <meta name="description" content="Smart Contract Voting System" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
+            <Navbar />
             <Header />
 
             <div

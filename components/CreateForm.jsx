@@ -219,7 +219,7 @@ export default function CreateForm() {
         console.log(`chainId: ${chainId}`)
 
         const sendCreateVoting = async () => {
-            if (chainId == 31337 || !isSupportedChain()) {
+            if (chainId == 31337 || !isSupportedChain) {
                 await createVoting({
                     onSuccess: handleSuccess,
                     onError: (error) => console.log(error),

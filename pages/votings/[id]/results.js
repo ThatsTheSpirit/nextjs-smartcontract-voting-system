@@ -4,6 +4,7 @@ import { useWeb3Contract } from "react-moralis"
 import { useMoralis } from "react-moralis"
 import { contractAddresses, votingEngAbi, votingAbi } from "@/constants"
 import { useRouter } from "next/router"
+import Navbar from "@/components/Navbar"
 
 export default function Results() {
     const router = useRouter()
@@ -37,7 +38,7 @@ export default function Results() {
 
     function zip(arr1, arr2) {
         let result = []
-        const longest = arr1.length > arr2.length ? arr1.length : arr2.length
+        const longest = arr1?.length > arr2?.length ? arr1?.length : arr2?.length
 
         for (let i = 0; i < longest; i++) {
             result.push([arr1[i], arr2[i]])
@@ -139,6 +140,7 @@ export default function Results() {
 
     return (
         <div style={{ height: 800 }}>
+            <Navbar />
             <div style={{ textAlign: "center", fontSize: "1.5em" }}>{question}</div>
             {winner != "" ? (
                 <ResponsivePie

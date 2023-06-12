@@ -10,7 +10,7 @@ export default function Card(props) {
         <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
             <a href={link ? `votings/${id}` : ""}>
                 <img
-                    class="rounded-t-lg"
+                    className="rounded-t-lg"
                     src={`images/q${imageId}.jpg`}
                     alt=""
                     width={width}

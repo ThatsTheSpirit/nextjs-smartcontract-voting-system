@@ -141,7 +141,7 @@ export default function Results() {
     return (
         <div style={{ height: 800 }}>
             <Navbar />
-            <div style={{ textAlign: "center", fontSize: "1.5em" }}>{question}</div>
+            <div style={{ textAlign: "center", fontSize: "1.5em" }}>Вопрос: {question}</div>
             {winner != "" ? (
                 <ResponsivePie
                     //height={600}
@@ -264,7 +264,16 @@ export default function Results() {
                     ]}
                 />
             ) : (
-                <h1>Winner did not define</h1>
+                <div className="grid h-screen place-items-center">
+                    <h1 style={{ textAlign: "center", fontSize: "1.5em" }}>
+                        Победитель не определен!
+                    </h1>
+                    <img
+                        src={`https://avatarko.ru/img/kartinka/1/chelovechek_stroitel.jpg`}
+                        className="rounded-t-lg"
+                        alt=""
+                    />
+                </div>
             )}
         </div>
     )
